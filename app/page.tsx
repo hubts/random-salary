@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toBlob } from "html-to-image";
 
 type Tier = { v: number; p: number };
 type Preset = {
@@ -162,6 +163,8 @@ function SalaryChallenge() {
 
   const runIdRef = useRef(0);
   const historyEndRef = useRef<HTMLDivElement>(null);
+  const resultCardRef = useRef<HTMLDivElement>(null);
+  const [capturing, setCapturing] = useState(false);
 
   const runDraw = useCallback(async (targetYears: number, targetSeed: number, preset: Preset) => {
     const myRunId = ++runIdRef.current;
@@ -259,6 +262,38 @@ function SalaryChallenge() {
       showToast("🔗 링크가 복사됐어요!");
     } catch {
       prompt("링크를 복사하세요:", url);
+    }
+  };
+
+  const handleCopyImage = async () => {
+    if (!resultCardRef.current || capturing) return;
+    setCapturing(true);
+    try {
+      const blob = await toBlob(resultCardRef.current, {
+        pixelRatio: 2,
+        backgroundColor: "#0a0a14",
+        cacheBust: true,
+        filter: (node) => !(node instanceof HTMLElement && node.classList?.contains("no-capture")),
+      });
+      if (!blob) throw new Error("capture failed");
+
+      if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
+        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+        showToast("📸 이미지 복사 완료!");
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `월급뽑기_${years}년.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast("📥 이미지 다운로드!");
+      }
+    } catch (e) {
+      console.error(e);
+      showToast("❌ 이미지 생성 실패");
+    } finally {
+      setCapturing(false);
     }
   };
 
@@ -385,7 +420,7 @@ function SalaryChallenge() {
 
       {screen === "result" && (
         <section>
-          <div className="card">
+          <div className="card" ref={resultCardRef}>
             <h2>📊 최종 결과</h2>
             <div className="result-grid">
               <div className="result-box safe">
@@ -424,12 +459,17 @@ function SalaryChallenge() {
                 <div className="k">최저 월</div>
               </div>
             </div>
-            <button className="btn btn-primary" onClick={handleShare}>
-              🔗 친구에게 자랑하기
-            </button>
-            <button className="btn btn-secondary" onClick={handleRetry}>
-              🔄 다시 뽑기
-            </button>
+            <div className="no-capture">
+              <button className="btn btn-primary" onClick={handleCopyImage} disabled={capturing}>
+                {capturing ? "📸 생성 중..." : "📸 이미지로 복사"}
+              </button>
+              <button className="btn btn-secondary" onClick={handleShare}>
+                🔗 링크 공유
+              </button>
+              <button className="btn btn-secondary" onClick={handleRetry}>
+                🔄 다시 뽑기
+              </button>
+            </div>
           </div>
         </section>
       )}
