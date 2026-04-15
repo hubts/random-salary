@@ -191,13 +191,45 @@ input:focus { border-color: var(--accent); }
   to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-.chip.t-100 { background: rgba(139,139,167,0.2); color: #b8b8d0; }
-.chip.t-200 { background: rgba(74,222,128,0.15); color: #86efac; }
-.chip.t-300 { background: rgba(96,165,250,0.15); color: #93c5fd; }
-.chip.t-500 { background: rgba(167,139,250,0.2); color: #c4b5fd; }
-.chip.t-1000 { background: rgba(255,217,61,0.2); color: var(--accent); }
-.chip.t-5000 { background: linear-gradient(135deg, rgba(255,107,157,0.3), rgba(255,217,61,0.3)); color: var(--accent); }
-.chip.t-10000 { background: linear-gradient(135deg, #ff6b9d, #ffd93d); color: #1a1a1a; box-shadow: 0 0 20px rgba(255,217,61,0.5); }
+.chip.common { background: rgba(139,139,167,0.2); color: #b8b8d0; }
+.chip.uncommon { background: rgba(96,165,250,0.18); color: #93c5fd; }
+.chip.rare { background: rgba(255,217,61,0.22); color: var(--accent); }
+.chip.legendary {
+  background: linear-gradient(135deg, #ff6b9d, #ffd93d);
+  color: #1a1a1a;
+  box-shadow: 0 0 20px rgba(255,217,61,0.5);
+  animation: chipIn 0.3s ease, legendGlow 2s ease-in-out infinite;
+}
+@keyframes legendGlow {
+  0%,100% { box-shadow: 0 0 20px rgba(255,217,61,0.5); }
+  50% { box-shadow: 0 0 30px rgba(255,107,157,0.8); }
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.preset-btn {
+  background: var(--bg);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  color: var(--text);
+  font-family: inherit;
+}
+.preset-btn:hover { border-color: rgba(255,217,61,0.3); transform: translateY(-2px); }
+.preset-btn.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(255,217,61,0.1), rgba(255,107,157,0.05));
+  box-shadow: 0 0 0 3px rgba(255,217,61,0.15);
+}
+.preset-emoji { font-size: 28px; margin-bottom: 4px; }
+.preset-name { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
+.preset-desc { font-size: 11px; color: var(--muted); line-height: 1.3; }
 
 .result-grid {
   display: grid;
