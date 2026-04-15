@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta property="og:title" content="월급 뽑기 vs 안정 300만원" />
+<meta property="og:description" content="운명의 월급 뽑기에 도전해보세요!" />
+<title>🎰 월급 뽑기 vs 안정 300만원</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a14;
+    --bg2: #14142b;
+    --accent: #ffd93d;
+    --accent2: #ff6b9d;
+    --green: #4ade80;
+    --red: #f87171;
+    --text: #f5f5f7;
+    --muted: #8b8ba7;
+    --card: #1c1c33;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", "Noto Sans KR", sans-serif;
+    background: radial-gradient(ellipse at top, var(--bg2), var(--bg));
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    overflow-x: hidden;
+  }
+  .container { max-width: 780px; margin: 0 auto; }
+  header { text-align: center; padding: 30px 0 20px; }
+  h1 {
+    font-size: clamp(28px, 6vw, 44px);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+  }
+  .subtitle { color: var(--muted); font-size: 15px; }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 28px;
+    margin: 20px 0;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .card h2 { font-size: 18px; margin-bottom: 16px; color: var(--accent); }
+  .prob-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .prob-table td {
+    padding: 10px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .prob-table td:first-child { color: var(--text); font-weight: 600; }
+  .prob-table td:last-child { text-align: right; color: var(--accent); font-weight: 700; }
+  .prob-table tr.rare td:last-child { color: var(--accent2); }
+  label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: 16px;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 600;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input:focus { border-color: var(--accent); }
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #ffb347);
+    color: #1a1a1a;
+    box-shadow: 0 10px 30px rgba(255,217,61,0.3);
+    margin-top: 12px;
+  }
+  .btn-primary:hover { box-shadow: 0 14px 40px rgba(255,217,61,0.45); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    margin-top: 10px;
+  }
+  .hidden { display: none !important; }
+
+  /* Draw screen */
+  .draw-stage {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .year-counter {
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .slot {
+    font-size: clamp(48px, 12vw, 88px);
+    font-weight: 900;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(255,217,61,0.08), rgba(255,107,157,0.05));
+    border-radius: 20px;
+    margin: 20px 0;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid rgba(255,217,61,0.2);
+  }
+  .slot-value {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: transform 0.05s;
+  }
+  .slot.rolling .slot-value { animation: shake 0.08s infinite; }
+  @keyframes shake {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .slot.pop { animation: pop 0.5s ease; }
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.15); box-shadow: 0 0 60px rgba(255,217,61,0.5); }
+    100% { transform: scale(1); }
+  }
+
+  .history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 20px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .chip {
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    animation: chipIn 0.3s ease;
+  }
+  @keyframes chipIn {
+    from { transform: scale(0) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .chip.t-100 { background: rgba(139,139,167,0.2); color: #b8b8d0; }
+  .chip.t-200 { background: rgba(74,222,128,0.15); color: #86efac; }
+  .chip.t-300 { background: rgba(96,165,250,0.15); color: #93c5fd; }
+  .chip.t-500 { background: rgba(167,139,250,0.2); color: #c4b5fd; }
+  .chip.t-1000 { background: rgba(255,217,61,0.2); color: var(--accent); }
+  .chip.t-5000 { background: linear-gradient(135deg, rgba(255,107,157,0.3), rgba(255,217,61,0.3)); color: var(--accent); }
+  .chip.t-10000 { background: linear-gradient(135deg, #ff6b9d, #ffd93d); color: #1a1a1a; box-shadow: 0 0 20px rgba(255,217,61,0.5); }
+
+  /* Result */
+  .result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+  .result-box {
+    background: var(--bg);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .result-box .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .result-box .amount {
+    font-size: clamp(20px, 4.5vw, 28px);
+    font-weight: 900;
+  }
+  .result-box.safe { border-color: rgba(96,165,250,0.3); }
+  .result-box.safe .amount { color: #93c5fd; }
+  .result-box.draw.win { border-color: rgba(74,222,128,0.4); }
+  .result-box.draw.win .amount { color: var(--green); }
+  .result-box.draw.lose { border-color: rgba(248,113,113,0.4); }
+  .result-box.draw.lose .amount { color: var(--red); }
+
+  .verdict {
+    text-align: center;
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 900;
+    padding: 24px;
+    border-radius: 16px;
+    margin: 20px 0;
+  }
+  .verdict.win {
+    background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(74,222,128,0.05));
+    color: var(--green);
+    border: 2px solid rgba(74,222,128,0.4);
+  }
+  .verdict.lose {
+    background: linear-gradient(135deg, rgba(248,113,113,0.2), rgba(248,113,113,0.05));
+    color: var(--red);
+    border: 2px solid rgba(248,113,113,0.4);
+  }
+  .diff { font-size: 16px; display: block; margin-top: 6px; color: var(--muted); font-weight: 600; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: var(--bg);
+    padding: 14px 10px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .stat .v { font-size: 18px; font-weight: 800; color: var(--accent); }
+  .stat .k { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .confetti {
+    position: fixed;
+    pointer-events: none;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 999;
+  }
+  .confetti i {
+    position: absolute;
+    width: 10px; height: 14px;
+    top: -20px;
+    animation: fall 3s linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--accent);
+    color: #1a1a1a;
+    padding: 14px 24px;
+    border-radius: 30px;
+    font-weight: 700;
+    transition: transform 0.3s;
+    z-index: 1000;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 480px) {
+    .card { padding: 20px; }
+    .result-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎰 월급 뽑기 챌린지</h1>
+    <p class="subtitle">안정적인 월 300만원 vs 운명의 월급 뽑기<br>과연 당신의 선택은?</p>
+  </header>
+
+  <!-- STEP 1: Input -->
+  <section id="screen-input">
+    <div class="card">
+      <h2>📋 뽑기 확률표</h2>
+      <table class="prob-table">
+        <tr><td>100만원</td><td>30.5%</td></tr>
+        <tr><td>200만원</td><td>35.0%</td></tr>
+        <tr><td>300만원</td><td>28.0%</td></tr>
+        <tr><td>500만원</td><td>5.0%</td></tr>
+        <tr class="rare"><td>1,000만원</td><td>1.0%</td></tr>
+        <tr class="rare"><td>5,000만원</td><td>0.4%</td></tr>
+        <tr class="rare"><td>10,000만원</td><td>0.1%</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <label for="years">몇 년 동안 일하실 건가요?</label>
+      <input type="number" id="years" min="1" max="50" value="10" />
+      <button class="btn btn-primary" id="start-btn">🎲 운명의 뽑기 시작!</button>
+    </div>
+  </section>
+
+  <!-- STEP 2: Drawing -->
+  <section id="screen-draw" class="hidden">
+    <div class="card draw-stage">
+      <div class="year-counter" id="year-counter">1년차 / 10년</div>
+      <div class="slot" id="slot">
+        <div class="slot-value" id="slot-value">???</div>
+      </div>
+      <div class="history" id="history"></div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Result -->
+  <section id="screen-result" class="hidden">
+    <div class="card">
+      <h2>📊 최종 결과</h2>
+      <div class="result-grid">
+        <div class="result-box safe">
+          <div class="label">💼 안정 월 300만원</div>
+          <div class="amount" id="safe-amount">-</div>
+        </div>
+        <div class="result-box draw" id="draw-box">
+          <div class="label">🎰 월급 뽑기</div>
+          <div class="amount" id="draw-amount">-</div>
+        </div>
+      </div>
+      <div class="verdict" id="verdict"></div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="stat-avg">-</div><div class="k">월 평균</div></div>
+        <div class="stat"><div class="v" id="stat-max">-</div><div class="k">최고 월</div></div>
+        <div class="stat"><div class="v" id="stat-min">-</div><div class="k">최저 월</div></div>
+      </div>
+      <button class="btn btn-primary" id="share-btn">🔗 친구에게 자랑하기</button>
+      <button class="btn btn-secondary" id="retry-btn">🔄 다시 뽑기</button>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast">링크 복사 완료!</div>
+
+<script>
+const PROB = [
+  { v: 100,   p: 0.305 },
+  { v: 200,   p: 0.350 },
+  { v: 300,   p: 0.280 },
+  { v: 500,   p: 0.050 },
+  { v: 1000,  p: 0.010 },
+  { v: 5000,  p: 0.004 },
+  { v: 10000, p: 0.001 },
+];
+
+function drawOne(rng) {
+  const r = rng();
+  let acc = 0;
+  for (const t of PROB) {
+    acc += t.p;
+    if (r < acc) return t.v;
+  }
+  return PROB[PROB.length - 1].v;
+}
+
+// Seeded RNG (mulberry32) for sharable results
+function seededRng(seed) {
+  let a = seed >>> 0;
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+const fmt = n => n.toLocaleString('ko-KR');
+const fmtWon = n => {
+  if (n >= 10000) {
+    const eok = Math.floor(n / 10000);
+    const man = n % 10000;
+    return man > 0 ? `${eok}억 ${fmt(man)}만원` : `${eok}억원`;
+  }
+  return `${fmt(n)}만원`;
+};
+
+const $ = id => document.getElementById(id);
+
+let state = { years: 10, draws: [], seed: 0 };
+
+$('start-btn').addEventListener('click', () => {
+  const y = parseInt($('years').value, 10);
+  if (!y || y < 1 || y > 50) { alert('1~50 사이로 입력해주세요!'); return; }
+  state.years = y;
+  state.seed = Math.floor(Math.random() * 2**32);
+  runDraw();
+});
+
+$('retry-btn').addEventListener('click', () => {
+  $('screen-result').classList.add('hidden');
+  $('screen-input').classList.remove('hidden');
+  // clear URL params
+  history.replaceState(null, '', location.pathname);
+});
+
+$('share-btn').addEventListener('click', async () => {
+  const url = `${location.origin}${location.pathname}?y=${state.years}&s=${state.seed}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('🔗 링크가 복사됐어요!');
+  } catch {
+    prompt('링크를 복사하세요:', url);
+  }
+});
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+async function runDraw() {
+  $('screen-input').classList.add('hidden');
+  $('screen-result').classList.add('hidden');
+  $('screen-draw').classList.remove('hidden');
+  $('history').innerHTML = '';
+  state.draws = [];
+
+  const rng = seededRng(state.seed);
+  const months = state.years * 12;
+  const slotEl = $('slot');
+  const valEl = $('slot-value');
+  const histEl = $('history');
+  const yearEl = $('year-counter');
+
+  // Pacing: faster for more months
+  const perDraw = months > 120 ? 60 : months > 60 ? 100 : 150;
+  const rollFrames = months > 240 ? 3 : months > 120 ? 4 : 6;
+
+  for (let m = 0; m < months; m++) {
+    const year = Math.floor(m / 12) + 1;
+    yearEl.textContent = `${year}년차 / ${state.years}년 (${m + 1}/${months}월)`;
+    slotEl.classList.add('rolling');
+
+    for (let f = 0; f < rollFrames; f++) {
+      const fake = PROB[Math.floor(Math.random() * PROB.length)].v;
+      valEl.textContent = fmt(fake) + '만';
+      await sleep(perDraw / rollFrames);
+    }
+
+    const val = drawOne(rng);
+    state.draws.push(val);
+    slotEl.classList.remove('rolling');
+    valEl.textContent = fmt(val) + '만';
+    slotEl.classList.add('pop');
+    setTimeout(() => slotEl.classList.remove('pop'), 500);
+
+    if (val >= 1000) {
+      burstConfetti(val >= 5000 ? 80 : 30);
+    }
+
+    const chip = document.createElement('div');
+    chip.className = `chip t-${val}`;
+    chip.textContent = fmt(val);
+    histEl.appendChild(chip);
+    histEl.scrollTop = histEl.scrollHeight;
+
+    await sleep(val >= 1000 ? 500 : 50);
+  }
+
+  await sleep(400);
+  showResult();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showResult() {
+  $('screen-draw').classList.add('hidden');
+  $('screen-result').classList.remove('hidden');
+
+  const draws = state.draws;
+  const drawTotal = draws.reduce((a, b) => a + b, 0);
+  const safeTotal = 300 * draws.length;
+  const avg = Math.round(drawTotal / draws.length);
+  const max = Math.max(...draws);
+  const min = Math.min(...draws);
+
+  $('safe-amount').textContent = fmtWon(safeTotal);
+  $('draw-amount').textContent = fmtWon(drawTotal);
+  $('stat-avg').textContent = fmt(avg) + '만';
+  $('stat-max').textContent = fmt(max) + '만';
+  $('stat-min').textContent = fmt(min) + '만';
+
+  const drawBox = $('draw-box');
+  const verdict = $('verdict');
+  const diff = drawTotal - safeTotal;
+
+  if (diff >= 0) {
+    drawBox.classList.add('win');
+    drawBox.classList.remove('lose');
+    verdict.className = 'verdict win';
+    verdict.innerHTML = `🎉 뽑기 대승! 인생역전!<br><span class="diff">+${fmtWon(diff)} 더 벌었어요</span>`;
+    burstConfetti(150);
+  } else {
+    drawBox.classList.add('lose');
+    drawBox.classList.remove('win');
+    verdict.className = 'verdict lose';
+    verdict.innerHTML = `😭 안정이 최고였네요...<br><span class="diff">${fmtWon(diff)} 손해</span>`;
+  }
+}
+
+function burstConfetti(count = 50) {
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti';
+  const colors = ['#ffd93d', '#ff6b9d', '#4ade80', '#60a5fa', '#c4b5fd'];
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('i');
+    c.style.left = Math.random() * 100 + '%';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 0.5 + 's';
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    wrap.appendChild(c);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 4500);
+}
+
+// Load shared link
+(function loadShared() {
+  const params = new URLSearchParams(location.search);
+  const y = parseInt(params.get('y'), 10);
+  const s = parseInt(params.get('s'), 10);
+  if (y && s && y >= 1 && y <= 50) {
+    state.years = y;
+    state.seed = s;
+    $('years').value = y;
+    runDraw();
+  }
+})();
+</script>
+</body>
+</html>
