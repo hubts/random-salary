@@ -271,9 +271,8 @@ function SalaryChallenge() {
     try {
       const blob = await toBlob(resultCardRef.current, {
         pixelRatio: 2,
-        backgroundColor: "#0a0a14",
+        backgroundColor: "#1c1c33",
         cacheBust: true,
-        filter: (node) => !(node instanceof HTMLElement && node.classList?.contains("no-capture")),
       });
       if (!blob) throw new Error("capture failed");
 
@@ -420,14 +419,15 @@ function SalaryChallenge() {
 
       {screen === "result" && (
         <section>
-          <div className="card" ref={resultCardRef}>
-            <h2>📊 최종 결과</h2>
-            <div className="result-meta">
-              <span className="meta-badge">
-                {getPreset(presetId).emoji} {getPreset(presetId).name}
-              </span>
-              <span className="meta-years">{years}년 근무</span>
-            </div>
+          <div className="card">
+            <div ref={resultCardRef} className="capture-area">
+              <h2>📊 최종 결과</h2>
+              <div className="result-meta">
+                <span className="meta-badge">
+                  {getPreset(presetId).emoji} {getPreset(presetId).name}
+                </span>
+                <span className="meta-years">{years}년 근무</span>
+              </div>
             <div className="result-grid">
               <div className="result-box safe">
                 <div className="label">💼 안정 월 300만원</div>
@@ -465,17 +465,16 @@ function SalaryChallenge() {
                 <div className="k">최저 월</div>
               </div>
             </div>
-            <div className="no-capture">
-              <button className="btn btn-primary" onClick={handleCopyImage} disabled={capturing}>
-                {capturing ? "📸 생성 중..." : "📸 이미지로 복사"}
-              </button>
-              <button className="btn btn-secondary" onClick={handleShare}>
-                🔗 링크 공유
-              </button>
-              <button className="btn btn-secondary" onClick={handleRetry}>
-                🔄 다시 뽑기
-              </button>
             </div>
+            <button className="btn btn-primary" onClick={handleCopyImage} disabled={capturing}>
+              {capturing ? "📸 생성 중..." : "📸 이미지로 복사"}
+            </button>
+            <button className="btn btn-secondary" onClick={handleShare}>
+              🔗 링크 공유
+            </button>
+            <button className="btn btn-secondary" onClick={handleRetry}>
+              🔄 다시 뽑기
+            </button>
           </div>
         </section>
       )}
