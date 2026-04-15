@@ -419,15 +419,14 @@ function SalaryChallenge() {
 
       {screen === "result" && (
         <section>
-          <div className="card">
-            <div ref={resultCardRef} className="capture-area">
-              <h2>📊 최종 결과</h2>
-              <div className="result-meta">
-                <span className="meta-badge">
-                  {getPreset(presetId).emoji} {getPreset(presetId).name}
-                </span>
-                <span className="meta-years">{years}년 근무</span>
-              </div>
+          <div className="card" ref={resultCardRef}>
+            <h2>📊 최종 결과</h2>
+            <div className="result-meta">
+              <span className="meta-badge">
+                {getPreset(presetId).emoji} {getPreset(presetId).name}
+              </span>
+              <span className="meta-years">{years}년 근무</span>
+            </div>
             <div className="result-grid">
               <div className="result-box safe">
                 <div className="label">💼 안정 월 300만원</div>
@@ -464,7 +463,6 @@ function SalaryChallenge() {
                 <div className="v">{fmtShort(min)}</div>
                 <div className="k">최저 월</div>
               </div>
-            </div>
             </div>
             <button className="btn btn-primary" onClick={handleCopyImage} disabled={capturing}>
               {capturing ? "📸 생성 중..." : "📸 이미지로 복사"}
