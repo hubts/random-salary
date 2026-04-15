@@ -273,6 +273,7 @@ function SalaryChallenge() {
         pixelRatio: 2,
         backgroundColor: "#1c1c33",
         cacheBust: true,
+        style: { margin: "0", boxShadow: "none" },
       });
       if (!rawBlob) throw new Error("capture failed");
 
