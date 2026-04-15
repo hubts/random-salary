@@ -269,12 +269,40 @@ function SalaryChallenge() {
     if (!resultCardRef.current || capturing) return;
     setCapturing(true);
     try {
-      const blob = await toBlob(resultCardRef.current, {
+      const rawBlob = await toBlob(resultCardRef.current, {
         pixelRatio: 2,
         backgroundColor: "#1c1c33",
         cacheBust: true,
       });
-      if (!blob) throw new Error("capture failed");
+      if (!rawBlob) throw new Error("capture failed");
+
+      // 바깥 여백을 추가하기 위해 canvas로 한 번 더 감싸기
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = URL.createObjectURL(rawBlob);
+      });
+
+      const padding = 48 * 2; // pixelRatio 반영
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width + padding * 2;
+      canvas.height = img.height + padding * 2;
+      const ctx = canvas.getContext("2d")!;
+      const grad = ctx.createRadialGradient(
+        canvas.width / 2, 0, 0,
+        canvas.width / 2, 0, canvas.height,
+      );
+      grad.addColorStop(0, "#14142b");
+      grad.addColorStop(1, "#0a0a14");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, padding, padding);
+      URL.revokeObjectURL(img.src);
+
+      const blob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("blob failed"))), "image/png"),
+      );
 
       if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
         await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
